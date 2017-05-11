@@ -1,8 +1,9 @@
 # Notific
 
-Notific is a simple, and minimal static notification system for Laravel. It stores notification data based on user_id, and fetch notifications for the user_id. It's not _that_ feature rich.
+Notific is a simple, and minimal, static notification system for Laravel. It stores notification data based on user_id, and fetch notifications for the user_id. It's not _that_ feature rich.
 
-Developers: [Nazmul Hasan](https://github.com/nazmulcse), [Mayeenul Islam](https://github.com/mayeenulislam)
+**License:** GPL-2.0+<br>
+**Developers:** [Nazmul Hasan](https://github.com/nazmulcse), [Mayeenul Islam](https://github.com/mayeenulislam)
 
 ---
 <div align="center">
@@ -23,7 +24,7 @@ We might not support the package full throttle. But bug reports are welcome.
 * Cache data to save some valuable resources
 
 Features that are _not_ present:
-* Event listener
+* Event listener and real time notification
 
 ## Installation
 
@@ -158,7 +159,7 @@ With the following examples a user with the ID `21` will be notified accordingly
 // Notified with a simple message.
 notify( 21, 'Your application submitted.' ) );
 
-// Notified with a message with a date.
+// Notified with a message and date.
 notify( 21, sprintf( 'Your application submitted on %s is approved.', date('d F Y') ) );
 
 // Notified with a different type of notification.
@@ -199,4 +200,4 @@ Any bug report is welcome. We might not support the package as you might require
 If you want to contribute code, feel free to add [Pull Request](https://github.com/mayeenulislam/notific/pulls).
 
 ## Credits
-All the credit goes to the almighty God first. Thanks to Mr. Amiya Kishore Saha who let both of us make our first Laravel package. Thanks to Mr. Kamrul Hasan for reviewing the progress and suggesting his ideas. And thanks to TechnoVista Limited for supporting the initiative. Thanks to [Notifynder](https://github.com/fenos/Notifynder) - a Laravel notification package available at Packagist from Fabrizio - we followed them to learn. Thanks to [WordPress](https://wordpress.org/) - a GPL licensed web framework - we took some of their code thankfully.
+All the credit goes to the almighty God first. Thanks to Mr. Amiya Kishore Saha who let both of us make our first Laravel package. Thanks to Mr. Kamrul Hasan for reviewing the progress and suggesting his ideas. And thanks to [TechnoVista Limited](http://technovista.com.bd/) for supporting the initiative. Thanks to [Notifynder](https://github.com/fenos/Notifynder) - a Laravel notification package available at Packagist from Fabrizio - we followed them to learn. Thanks to [WordPress](https://wordpress.org/) - a GPL licensed web framework - we took some of their code thankfully.
