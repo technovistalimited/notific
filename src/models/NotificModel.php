@@ -1,0 +1,398 @@
+<?php
+
+namespace Mayeenulislam\Notific\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+
+class NotificModel extends Model
+{
+	protected $table = 'notifications';
+
+    protected $fillable = [
+        'message',
+        'notification_type',
+        'meta',
+        'created_by',
+        'created_at',
+    ];
+
+    /**
+     * API: Notify.
+     *
+     * The method will store the notification into the respective tables.
+     *
+     * @since  1.0.0 Introduced.
+     *
+     * @see    self::storeNotification()					Storing notification.
+     * @see    self::storeUserNotification()				Assigning notification to user[s].
+     *
+     * @param  integer|array 			$userId     		User ID or Array of user IDs.
+     * @param  string 					$message   			Notification message.
+     * @param  string 					$notificationType   Type of the notification.
+     * @param  string|integer|array 	$metaData   		Any meta information.
+     * @param  null|integer 			$createdBy  		Created by user ID.
+     * @return boolean              						True if done, false otherwise.
+     * ---------------------------------------------------------------------
+     */
+    public static function notify( $userId, $message, $notificationType, $metaData, $createdBy )
+    {
+    	// Clear the user notification cache first.
+    	self::clearNotificationCach( $userId );
+
+    	// Store the notification first.
+    	$notificationId = self::storeNotification( $message, $notificationType, $metaData, $createdBy );
+
+    	// Notify the user one by one.
+    	if( !empty($notificationId) ) {
+    		if( is_array($userId) ) {
+    			foreach( $userId as $u_id ) {
+    				self::storeUserNotification( $u_id, $notificationId );
+    			}
+    		} else {
+    			self::storeUserNotification( $userId, $notificationId );
+    		}
+
+    		return true;
+    	}
+
+    	return false;
+
+    }
+
+    /**
+     * Store Notification.
+     *
+     * @since  1.0.0 Introduced.
+     *
+     * @param  string 					$message   			Notification message.
+     * @param  string 					$notificationType   Type of the notification.
+     * @param  string|integer|array 	$metaData   		Any meta information.
+     * @param  null|integer 			$createdBy  		Created by user ID.
+     * @return integer              						Notification ID, otherwise null.
+     * ---------------------------------------------------------------------
+     */
+    public static function storeNotification( $message, $notificationType = '', $metaData = '', $createdBy = '' )
+    {
+    	if( empty($message) ) return 'Message cannot be empty';
+
+    	/**
+    	 * Set default to NotificationType.
+    	 * @var string.
+    	 */
+    	$notificationType = !empty($notificationType) ? $notificationType : 'notification';
+
+    	/**
+    	 * MaybeSerialize Meta data.
+    	 * Serialize meta data if necessary.
+    	 * @var integer|string|array.
+    	 * ...
+    	 */
+		$metaData  = self::maybeSerialize($metaData);
+
+		/**
+		 * Typecast the author info.
+		 * @var null|integer.
+		 * ...
+		 */
+		$createdBy = !empty($createdBy) ? intval($createdBy) : null;
+
+    	$notificationID = DB::table('notifications')->insertGetId([
+            'message'           => trim($message),
+            'notification_type' => trim($notificationType),
+            'meta'              => $metaData,
+            'created_by'        => $createdBy,
+            'created_at'        => date('Y-m-d H:m:s')
+    	]);
+
+    	return $notificationID;
+    }
+
+
+    /**
+     * Store User Notification.
+     *
+     * @since  1.0.0 Introduced.
+     *
+     * @param  integer|array 	$userId       		User ID or Array of user IDs.
+     * @param  integer 			$notificationId 	Notification ID.
+     * @return integer                  			User Notification ID, otherwise null.
+     * ---------------------------------------------------------------------
+     */
+    public static function storeUserNotification( $userId, $notificationId )
+    {
+    	if( empty($userId) ) return 'User ID should be there';
+    	if( empty($notificationId) ) return 'Notification ID should be there';
+
+    	$userNotifyId = DB::table('user_notifications')->insertGetId([
+			'user_id'         => intval($userId),
+			'notification_id' => intval($notificationId),
+			'is_read'         => 0
+    	]);
+
+    	return $userNotifyId;
+    }
+
+    /**
+     * Clear specific cache.
+     *
+     * @since  1.0.0 Introduced.
+     *
+     * @param  integer $userId User ID to clear cache for.
+     * @return void.
+     * ---------------------------------------------------------------------
+     */
+    public static function clearNotificationCach( $userId )
+    {
+    	if(empty($userId)) return 'You must define a user ID';
+
+    	/**
+    	 * Cache Key.
+    	 * Manage the cache files with the key defined.
+    	 * @var string.
+    	 * ...
+    	 */
+    	$cacheKey = "notific_$userId";
+
+
+    	if( Cache::has($cacheKey) ) {
+    		Cache::forget($cacheKey);
+    	}
+    }
+
+    /**
+     * Mark Notification as read.
+     *
+     * @since  1.0.0 Introduced.
+     *
+     * @param  integer $userId         User ID.
+     * @param  integer $notificationId Notification ID.
+     * @return boolean                 If done true, false otherwise.
+     * ---------------------------------------------------------------------
+     */
+    public static function markNotificationRead( $userId, $notificationId = '' )
+    {
+    	if(empty($userId)) return 'You must define a user ID';
+
+    	if( empty($notificationId) ) {
+	    	$result = DB::table('user_notifications')
+	    	        ->where('user_id', $userId)
+	                ->update([
+						'is_read'    => 1,
+						'updated_at' => date('Y-m-d H:m:s')
+	                ]);
+        } else {
+        	$result = DB::table('user_notifications')
+	    	        ->where('user_id', $userId)
+	    	        ->where('notification_id', $notificationId)
+	                ->update([
+						'is_read'    => 1,
+						'updated_at' => date('Y-m-d H:m:s')
+	                ]);
+        }
+
+        return empty($result) ? false : true;
+    }
+
+	/**
+	 * Retrieve Notification.
+	 *
+	 * @since  1.0.0 Introduced.
+	 *
+	 * @param  integer $userId  Individual user ID.
+	 * @param  string  $fetch   'all'|'read'|'unread'
+	 * @return array            Array of notifications.
+	 * ---------------------------------------------------------------------
+	 */
+	public static function getNotifications( $userId, $fetch = 'all' )
+	{
+		if( empty($userId) ) return 'User ID must be set';
+
+		/**
+		 * Fetch mode.
+		 * - 'read'   - fetch only unread messages, set is_read true,
+		 * - 'unread' - fetch only the read messages, set is_read false,
+		 * - 'all'    - fetch all the messages, bypass is_read,
+		 * @var string.
+		 * ...
+		 */
+		switch ($fetch) {
+			case 'read':
+				$isRead = 1;
+				break;
+
+			case 'unread':
+				$isRead = 0;
+				break;
+
+			default:
+				$isRead = 0;
+				break;
+		}
+
+		/**
+		 * Cache Key.
+		 * Manage the cache files with the key defined.
+		 * @var string.
+		 * ...
+		 */
+		$cacheKey = "notific_$userId";
+
+	    /**
+	     * Override the Cache Time, if you want.
+	     * Default: 10 minutes.
+	     * @var integer.
+	     * ...
+	     */
+	    $cacheTime = (int) config('notific.cache.cache_time');
+
+	    /**
+	     * Cache and return data.
+	     * @var null|object.
+	     * ...
+	     */
+	    $values = Cache::remember($cacheKey, $cacheTime, function() use( $userId, $fetch, $isRead ) {
+	    	if( 'all' === $fetch ) {
+                return DB::table( 'user_notifications' )
+                    ->leftJoin( 'notifications', 'user_notifications.notification_id', '=', 'notifications.id' )
+                    ->where( 'user_notifications.user_id', $userId )
+                    ->select( 'notifications.*' )
+                    ->get();
+	        } else {
+	        	return DB::table( 'user_notifications' )
+                    ->leftJoin( 'notifications', 'user_notifications.notification_id', '=', 'notifications.id' )
+                    ->where( 'user_notifications.user_id', $userId )
+                    ->where( 'user_notifications.is_read', $isRead )
+                    ->select( 'notifications.*' )
+                    ->get();
+	        }
+	    });
+
+	    $notifications = array();
+
+	    /**
+	     * MaybeUnserialize.
+	     * Unserialize the meta value if necessary.
+	     * @var array.
+	     * ...
+	     */
+	    foreach( $values as $key => $value ) :
+			$value->meta         = self::maybeUnserialize($value->meta);
+			$notifications[$key] = $value;
+	    endforeach;
+
+	    return $notifications;
+	}
+
+
+    /**
+     * Unserialize if necessary.
+     *
+     * Adopted from WordPress Core.
+     *
+     * @since  1.0.0 Introduced.
+     *
+     * @param  array|string $original Data want to unserialize.
+     * @return array|string           Data | Unserialized data.
+     * ---------------------------------------------------------------------
+     */
+    public static function maybeUnserialize( $original ) {
+        if ( self::isSerialized( $original ) ) // don't attempt to unserialize data that wasn't serialized, going in
+            return @unserialize( $original );
+
+        return $original;
+    }
+
+
+    /**
+     * Serialize data.
+     *
+     * Adopted from WordPress Core.
+     *
+     * @since  1.0.0 Introduced.
+     *
+     * @param  string|array $data   Data to be serialized.
+     * @return string               Serialized data | String.
+     * ---------------------------------------------------------------------
+     */
+    public static function maybeSerialize( $data ) {
+        if ( is_array( $data ) || is_object( $data ) ) {
+            return serialize( $data );
+        }
+
+        if ( self::isSerialized( $data, false ) ) {
+            return serialize( $data );
+        }
+
+        return $data;
+    }
+
+
+    /**
+     * Check whether is serialized?
+     *
+     * Adopted from WordPress Core.
+     *
+     * @since  1.0.0 Introduced.
+     *
+     * @param  string|array $data       Data to check serialization.
+     * @param  boolean      $strict     Strict or not.
+     * @return boolean                  True | False.
+     * ---------------------------------------------------------------------
+     */
+    private static function isSerialized( $data, $strict = true ) {
+        // if it isn't a string, it isn't serialized.
+        if ( ! is_string( $data ) ) {
+            return false;
+        }
+        $data = trim( $data );
+        if ( 'N;' == $data ) {
+            return true;
+        }
+        if ( strlen( $data ) < 4 ) {
+            return false;
+        }
+        if ( ':' !== $data[1] ) {
+            return false;
+        }
+        if ( $strict ) {
+            $lastc = substr( $data, -1 );
+            if ( ';' !== $lastc && '}' !== $lastc ) {
+                return false;
+            }
+        } else {
+            $semicolon = strpos( $data, ';' );
+            $brace     = strpos( $data, '}' );
+            // Either ; or } must exist.
+            if ( false === $semicolon && false === $brace )
+                return false;
+            // But neither must be in the first X characters.
+            if ( false !== $semicolon && $semicolon < 3 )
+                return false;
+            if ( false !== $brace && $brace < 4 )
+                return false;
+        }
+        $token = $data[0];
+        switch ( $token ) {
+            case 's' :
+                if ( $strict ) {
+                    if ( '"' !== substr( $data, -2, 1 ) ) {
+                        return false;
+                    }
+                } elseif ( false === strpos( $data, '"' ) ) {
+                    return false;
+                }
+                // or else fall through
+            case 'a' :
+            case 'O' :
+                return (bool) preg_match( "/^{$token}:[0-9]+:/s", $data );
+            case 'b' :
+            case 'i' :
+            case 'd' :
+                $end = $strict ? '$' : '';
+                return (bool) preg_match( "/^{$token}:[0-9.E-]+;$end/", $data );
+        }
+        return false;
+    }
+}

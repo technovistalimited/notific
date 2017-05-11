@@ -1,0 +1,35 @@
+## IDE/Editor
+.idea
+.idea/*
+*.sublime-project
+*.sublime-workspace
+_ide_helper.php
+sublime-gulp.log
+
+## Build files
+/dist/*
+
+## Windows shortcuts
+*.lnk
+
+## Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+## Folder config file
+Desktop.ini
+
+## Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+## Log files
+*.todo
+*.log
+
+## Archive files
+*.rar
+*.zip
+*.7zip
+
+## Node modules
+/node_modules/
