@@ -32,7 +32,8 @@ Features that are _not_ present:
 
 ## Installation
 
-The package is **NOT AVAILABLE in Packagist**, hence you have to download it from this repository.
+The package is **NOT AVAILABLE in Packagist**, hence you have to download it from this repository.<br>
+[<kbd>**DOWNLOAD v0.1.0**</kbd>](https://github.com/mayeenulislam/notific/releases/tag/v0.1.0)
 
 #### Step 1: Put the package in place
 * Create a directory in your app root with the name `packages`.
