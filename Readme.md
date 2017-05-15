@@ -33,7 +33,7 @@ Features that are _not_ present:
 ## Installation
 
 The package is **NOT AVAILABLE in Packagist**, hence you have to download it from this repository.<br>
-[<kbd>**DOWNLOAD v0.1.0**</kbd>](https://github.com/mayeenulislam/notific/releases/tag/v0.1.0)
+[<kbd>**DOWNLOAD v0.1.1**</kbd>](https://github.com/mayeenulislam/notific/releases/tag/v0.1.1)
 
 #### Step 1: Put the package in place
 * Create a directory in your app root with the name `packages`.
@@ -79,7 +79,7 @@ Mayeenulislam\Notific\NotificServiceProvider::class,
 Open up command console on the root of your app and run:
 
 ```
-composer dump autoload
+composer dump-autoload
 ```
 
 #### Step 4: Configuration and migration
@@ -131,7 +131,7 @@ To store notification, simply place the following method where you want to plug 
 #### Get notifications
 Get the notifications by user ID.
  ```php
- getNotifications( $userId, $fetch );
+ getNotifications( $userId, $fetch, $count );
  ```
 
 > **$userID** : _integer_<br>
@@ -139,6 +139,10 @@ Get the notifications by user ID.
 >
 > **$fetch** : _string_ : (optional)<br>
 > Whether to fetch only the _read_ or _unread_, or _all_ the notifications of that user.<br>
+> _default: `'all'` - fetch all the notifications_
+>
+> **$count** : _integer_ : (optional)<br>
+> How much of information to fetch. Accepted values: any positive number.<br>
 > _default: `'all'` - fetch all the notifications_
 
 
@@ -188,6 +192,9 @@ getNotifications( 21, 'unread' );
 
 // Get read notifications only.
 getNotifications( 21, 'read' );
+
+// Get read notifications and maximum 10 of them only.
+getNotifications( 21, 'all', 10 );
 ```
 
 ### 03. Mark notification as _read_

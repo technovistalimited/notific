@@ -200,12 +200,13 @@ class NotificModel extends Model
 	 *
 	 * @since  1.0.0 Introduced.
 	 *
-	 * @param  integer $userId  Individual user ID.
-	 * @param  string  $fetch   'all'|'read'|'unread'
+	 * @param  integer 			$userId  Individual user ID.
+	 * @param  string  			$fetch   'all'|'read'|'unread'
+	 * @param  string|integer   $count   'all'|number
 	 * @return array            Array of notifications.
 	 * ---------------------------------------------------------------------
 	 */
-	public static function getNotifications( $userId, $fetch = 'all' )
+	public static function getNotifications( $userId, $fetch = 'all', $count = 'all' )
 	{
 		if( empty($userId) ) return 'User ID must be set';
 
@@ -252,21 +253,27 @@ class NotificModel extends Model
 	     * @var null|object.
 	     * ...
 	     */
-	    $values = Cache::remember($cacheKey, $cacheTime, function() use( $userId, $fetch, $isRead ) {
+	    $values = Cache::remember($cacheKey, $cacheTime, function() use( $userId, $fetch, $isRead, $count ) {
+
+	    	$query = DB::table( 'user_notifications' )
+                    ->leftJoin( 'notifications', 'user_notifications.notification_id', '=', 'notifications.id' )
+                    ->where( 'user_notifications.user_id', $userId )
+                    ->select( 'notifications.*' );
+
 	    	if( 'all' === $fetch ) {
-                return DB::table( 'user_notifications' )
-                    ->leftJoin( 'notifications', 'user_notifications.notification_id', '=', 'notifications.id' )
-                    ->where( 'user_notifications.user_id', $userId )
-                    ->select( 'notifications.*' )
-                    ->get();
-	        } else {
-	        	return DB::table( 'user_notifications' )
-                    ->leftJoin( 'notifications', 'user_notifications.notification_id', '=', 'notifications.id' )
-                    ->where( 'user_notifications.user_id', $userId )
-                    ->where( 'user_notifications.is_read', $isRead )
-                    ->select( 'notifications.*' )
-                    ->get();
-	        }
+	    		$query = $query;
+	    	} else {
+	    		$query = $query->where( 'user_notifications.is_read', $isRead );
+	    	}
+
+	    	if( 'all' != $count ) {
+	    		$count = intval($count);
+	    		$query = $query->take($count)->get();
+	    	} else {
+				$query = $query->get();
+	    	}
+
+	    	return $query;
 	    });
 
 	    $notifications = array();
