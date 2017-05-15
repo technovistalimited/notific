@@ -266,6 +266,8 @@ class NotificModel extends Model
 	    		$query = $query->where( 'user_notifications.is_read', $isRead );
 	    	}
 
+	    	$query = $query->orderBy('created_at', 'desc');
+
 	    	if( 'all' != $count ) {
 	    		$count = intval($count);
 	    		$query = $query->take($count)->get();
