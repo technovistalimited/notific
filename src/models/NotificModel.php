@@ -362,7 +362,8 @@ class NotificModel extends Model
      * @return array|string           Data | Unserialized data.
      * ---------------------------------------------------------------------
      */
-    public static function maybeUnserialize( $original ) {
+    public static function maybeUnserialize( $original )
+    {
         if ( self::isSerialized( $original ) ) // don't attempt to unserialize data that wasn't serialized, going in
             return @unserialize( $original );
 
@@ -381,7 +382,8 @@ class NotificModel extends Model
      * @return string               Serialized data | String.
      * ---------------------------------------------------------------------
      */
-    public static function maybeSerialize( $data ) {
+    public static function maybeSerialize( $data )
+    {
         if ( is_array( $data ) || is_object( $data ) ) {
             return serialize( $data );
         }
@@ -406,7 +408,8 @@ class NotificModel extends Model
      * @return boolean                  True | False.
      * ---------------------------------------------------------------------
      */
-    private static function isSerialized( $data, $strict = true ) {
+    private static function isSerialized( $data, $strict = true )
+    {
         // if it isn't a string, it isn't serialized.
         if ( ! is_string( $data ) ) {
             return false;
