@@ -227,7 +227,7 @@ class NotificModel extends Model
 	 *           							Accepts any positive integer.
 	 *           							Default -1 - fetch everything.
 	 * }
-	 * @return object  Notification object.
+	 * @return array  Array of Notifications.
 	 * ---------------------------------------------------------------------
 	 */
 	public static function getNotifications( $userId, $arguments = array() )
