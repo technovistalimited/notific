@@ -39,7 +39,7 @@ class NotificModel extends Model
     public static function notify( $userId, $message, $notificationType, $metaData, $createdBy )
     {
     	// Clear the user notification cache first.
-    	self::clearNotificationCach( $userId );
+    	self::clearNotificationCache( $userId );
 
     	// Store the notification first.
     	$notificationId = self::storeNotification( $message, $notificationType, $metaData, $createdBy );
@@ -47,8 +47,8 @@ class NotificModel extends Model
     	// Notify the user one by one.
     	if( !empty($notificationId) ) {
     		if( is_array($userId) ) {
-    			foreach( $userId as $u_id ) {
-    				self::storeUserNotification( $u_id, $notificationId );
+    			foreach( $userId as $uId ) {
+    				self::storeUserNotification( $uId, $notificationId );
     			}
     		} else {
     			self::storeUserNotification( $userId, $notificationId );
@@ -143,7 +143,7 @@ class NotificModel extends Model
      * @return void.
      * ---------------------------------------------------------------------
      */
-    public static function clearNotificationCach( $userId )
+    public static function clearNotificationCache( $userId )
     {
     	if(empty($userId)) return 'You must define a user ID';
 
@@ -154,7 +154,6 @@ class NotificModel extends Model
     	 * ...
     	 */
     	$cacheKey = "notific_$userId";
-
 
     	if( Cache::has($cacheKey) ) {
     		Cache::forget($cacheKey);
@@ -192,7 +191,15 @@ class NotificModel extends Model
 	                ]);
         }
 
-        return empty($result) ? false : true;
+
+        if( empty($result) ) {
+    		return false;
+        } else {
+        	// Clear the user notification cache first.
+    		self::clearNotificationCache( $userId );
+
+    		return true;
+        }
     }
 
 	/**
