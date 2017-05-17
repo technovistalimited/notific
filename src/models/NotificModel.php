@@ -203,29 +203,48 @@ class NotificModel extends Model
     }
 
 	/**
-	 * Retrieve Notification.
+	 * Retrieve Notifications.
 	 *
 	 * @since  1.0.0 Introduced.
 	 *
-	 * @param  integer 			$userId  Individual user ID.
-	 * @param  string  			$fetch   'all'|'read'|'unread'
-	 * @param  string|integer   $count   'all'|number
-	 * @return array            Array of notifications.
+	 * @param  integer $userId   Individual user ID.
+	 * @param  array   $arguments {
+	 *     Optional. Array of Query parameters.
+	 *
+	 *     @type string $read_status 		The notification read status.
+	 *           							Accepts 'read', 'unread', 'all'.
+	 *           							Default 'all'.
+	 *     @type string $order          	Designates ascending or descending order of
+	 *           							notifications.
+	 *           							Accepts 'ASC', 'DESC'.
+	 *           							Default 'DESC'.
+	 *     @type string $orderby        	Sort retrieved posts by parameter. Single
+	 *           							option can be passed.
+	 *           							Accepts any valid column name from db table.
+	 *     @type boolean $paginate      	Whether to enable pagination or not.
+	 *           							Default false - pagination DEactivated.
+	 *     @type boolean $items_per_page	Fetch the number of items.
+	 *           							Accepts any positive integer.
+	 *           							Default -1 - fetch everything.
+	 * }
+	 * @return object  Notification object.
 	 * ---------------------------------------------------------------------
 	 */
-	public static function getNotifications( $userId, $fetch = 'all', $count = 'all' )
+	public static function getNotifications( $userId, $arguments = array() )
 	{
 		if( empty($userId) ) return 'User ID must be set';
 
-		/**
-		 * Fetch mode.
-		 * - 'read'   - fetch only unread messages, set is_read true,
-		 * - 'unread' - fetch only the read messages, set is_read false,
-		 * - 'all'    - fetch all the messages, bypass is_read,
-		 * @var string.
-		 * ...
-		 */
-		switch ($fetch) {
+		$defaults = array(
+			'read_status'    => 'all',
+			'order'          => 'DESC',
+			'orderby'        => 'created_at',
+			'paginate'       => false,
+			'items_per_page' => -1,
+		);
+
+		$baseArgs = self::parseArguments( $arguments, $defaults );
+
+		switch ($baseArgs['read_status']) {
 			case 'read':
 				$isRead = 1;
 				break;
@@ -260,24 +279,28 @@ class NotificModel extends Model
 	     * @var null|object.
 	     * ...
 	     */
-	    $values = Cache::remember($cacheKey, $cacheTime, function() use( $userId, $fetch, $isRead, $count ) {
+	    $values = Cache::remember($cacheKey, $cacheTime, function() use( $userId, $baseArgs, $isRead ) {
 
 	    	$query = DB::table( 'user_notifications' )
                     ->leftJoin( 'notifications', 'user_notifications.notification_id', '=', 'notifications.id' )
                     ->where( 'user_notifications.user_id', $userId )
                     ->select( 'notifications.*' );
 
-	    	if( 'all' === $fetch ) {
+	    	if( 'all' === $baseArgs['read_status'] ) {
 	    		$query = $query;
 	    	} else {
 	    		$query = $query->where( 'user_notifications.is_read', $isRead );
 	    	}
 
-	    	$query = $query->orderBy('created_at', 'desc');
+	    	$query = $query->orderBy($baseArgs['orderby'], $baseArgs['order']);
 
-	    	if( 'all' != $count ) {
-	    		$count = intval($count);
-	    		$query = $query->take($count)->get();
+	    	if( -1 != $baseArgs['items_per_page'] ) {
+	    		$count = abs( intval( $baseArgs['items_per_page'] ) );
+	    		if( true == $baseArgs['paginate'] ) {
+	    			$query = $query->paginate($count);
+	    		} else {
+		    		$query = $query->take($count)->get();
+	    		}
 	    	} else {
 				$query = $query->get();
 	    	}
@@ -299,6 +322,32 @@ class NotificModel extends Model
 	    endforeach;
 
 	    return $notifications;
+	}
+
+	/**
+	 * Parse Arguments.
+	 *
+	 * Parse user defined arguments and mix them with default
+	 * arguments defined.
+	 *
+	 * Adopted, but modified from WordPress Core.
+     *
+     * @since  1.0.0 Introduced.
+     *
+	 * @param  array $args      User defined arguments.
+	 * @param  array $defaults  Default arguments.
+	 * @return array            Merged version of arguments.
+	 * ---------------------------------------------------------------------
+	 */
+	public static function parseArguments( $args, $defaults )
+	{
+		if( ! is_array($args) || ! is_array($defaults) ) {
+			return 'Both the parameters need to be array';
+		}
+
+		$r =& $args;
+
+		return array_merge( $defaults, $r );
 	}
 
 

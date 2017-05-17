@@ -22,9 +22,9 @@ function notify( $userId, $message, $notificationType = '', $metaData = '', $cre
  * @see   NotificModel::getNotifications() Get user notifications.
  * ---------------------------------------------------------------------
  */
-function getNotifications( $userId, $fetch = 'all', $count = 'all' )
+function getNotifications( $userId, $arguments = array() )
 {
-	return NotificModel::getNotifications( $userId, $fetch, $count );
+	return NotificModel::getNotifications( $userId, $arguments );
 }
 
 /**
