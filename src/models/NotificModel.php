@@ -227,7 +227,7 @@ class NotificModel extends Model
 	 *           							Accepts any positive integer.
 	 *           							Default -1 - fetch everything.
 	 * }
-	 * @return array  Array of Notifications.
+	 * @return array  Notifications object.
 	 * ---------------------------------------------------------------------
 	 */
 	public static function getNotifications( $userId, $arguments = array() )
@@ -282,9 +282,9 @@ class NotificModel extends Model
 	    $values = Cache::remember($cacheKey, $cacheTime, function() use( $userId, $baseArgs, $isRead ) {
 
 	    	$query = DB::table( 'user_notifications' )
-                    ->leftJoin( 'notifications', 'user_notifications.notification_id', '=', 'notifications.id' )
-                    ->where( 'user_notifications.user_id', $userId )
-                    ->select( 'notifications.*' );
+	                ->leftJoin( 'notifications', 'user_notifications.notification_id', '=', 'notifications.id' )
+	                ->where( 'user_notifications.user_id', $userId )
+	                ->select( 'notifications.*' );
 
 	    	if( 'all' === $baseArgs['read_status'] ) {
 	    		$query = $query;
@@ -296,7 +296,7 @@ class NotificModel extends Model
 
 	    	if( -1 != $baseArgs['items_per_page'] ) {
 	    		$count = abs( intval( $baseArgs['items_per_page'] ) );
-	    		if( true == $baseArgs['paginate'] ) {
+	    		if( $baseArgs['paginate'] ) {
 	    			$query = $query->paginate($count);
 	    		} else {
 		    		$query = $query->take($count)->get();
@@ -306,9 +306,8 @@ class NotificModel extends Model
 	    	}
 
 	    	return $query;
-	    });
 
-	    $notifications = array();
+	    });
 
 	    /**
 	     * MaybeUnserialize.
@@ -317,11 +316,10 @@ class NotificModel extends Model
 	     * ...
 	     */
 	    foreach( $values as $key => $value ) :
-			$value->meta         = self::maybeUnserialize($value->meta);
-			$notifications[$key] = $value;
+			$values[$key]->meta = self::maybeUnserialize($value->meta);
 	    endforeach;
 
-	    return $notifications;
+	    return $values;
 	}
 
 	/**
