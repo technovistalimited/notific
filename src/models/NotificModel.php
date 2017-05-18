@@ -223,6 +223,7 @@ class NotificModel extends Model
 	 *     @type string $orderby        	Sort retrieved posts by parameter. Single
 	 *           							option can be passed.
 	 *           							Accepts any valid column name from db table.
+	 *           							Default 'created_at'.
 	 *     @type boolean $paginate      	Whether to enable pagination or not.
 	 *           							Default false - pagination DEactivated.
 	 *     @type boolean $items_per_page	Fetch the number of items.

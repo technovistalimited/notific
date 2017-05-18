@@ -33,7 +33,7 @@ Features that are _not_ present:
 ## Installation
 
 The package is **NOT AVAILABLE in Packagist**, hence you have to download it from this repository.<br>
-[<kbd>**DOWNLOAD v0.1.1**</kbd>](https://github.com/mayeenulislam/notific/releases/tag/v0.1.1)
+[<kbd>**DOWNLOAD v0.1.2**</kbd>](https://github.com/mayeenulislam/notific/releases/tag/v0.1.2)
 
 #### Step 1: Put the package in place
 * Create a directory in your app root with the name `packages`.
@@ -131,19 +131,35 @@ To store notification, simply place the following method where you want to plug 
 #### Get notifications
 Get the notifications by user ID.
  ```php
- getNotifications( $userId, $fetch, $count );
+ getNotifications( $userId, $arguments );
  ```
 
 > **$userID** : _integer_<br>
 > User ID for which to fetch the notifications.
 >
-> **$fetch** : _string_ : (optional)<br>
-> Whether to fetch only the _read_ or _unread_, or _all_ the notifications of that user.<br>
-> _default: `'all'` - fetch all the notifications_
+> **$arguments** : _array_ : (optional)<br>
+> Array of Query parameters.
+> _default: `array()` - fetch notifications based on default settings_
 >
-> **$count** : _integer_ : (optional)<br>
-> How much of information to fetch. Accepted values: any positive number.<br>
-> _default: `'all'` - fetch all the notifications_
+>> **$read_status** : _string_<br>
+>> The notification read status. Accepts: `'all'`, `'read'`, `'unread'`.<br>
+>> _default: `'all'`_
+>>
+>> **$order** : _string_<br>
+>> Designates ascending or descending order of notifications. Accepts `'ASC'`, `'DESC'`.<br>
+>> _default: `'DESC'`_
+>>
+>> **$orderby** : _string_<br>
+>> Sort retrieved posts by parameter. Single option can be passed. Accepts any valid column name from db table.<br>
+>> _default: `'created_at'`_
+>>
+>> **$paginate** : _boolean_<br>
+>> Whether to enable pagination or not.<br>
+>> _default: `false` - pagination DEactivated_
+>>
+>> **$items_per_page** : _integer_<br>
+>> Fetch the number of items. Accepts any positive integer.<br>
+>> _default: `-1` - fetch everything_
 
 
 #### Mark notification as _read_
@@ -188,13 +204,16 @@ With following examples we're fetching the notifications assigned to a user with
 getNotifications( 21 );
 
 // Get unread notifications only.
-getNotifications( 21, 'unread' );
+getNotifications( 21, array( 'read_status' => 'unread' ) );
 
 // Get read notifications only.
-getNotifications( 21, 'read' );
+getNotifications( 21, array( 'read_status' => 'read' ) );
 
 // Get read notifications and maximum 10 of them only.
-getNotifications( 21, 'all', 10 );
+getNotifications( 21, array( 'read_status' => 'all', 'items_per_page' => 10 ) );
+
+// Get all notifications and paginate them to 50 per page only.
+getNotifications( 21, array( 'paginate' => true, 'items_per_page' => 50 ) );
 ```
 
 ### 03. Mark notification as _read_
