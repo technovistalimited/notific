@@ -5,6 +5,8 @@ namespace Mayeenulislam\Notific\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class NotificModel extends Model
 {
@@ -295,10 +297,12 @@ class NotificModel extends Model
 	    	$query = $query->orderBy($baseArgs['orderby'], $baseArgs['order']);
 
 	    	if( -1 != $baseArgs['items_per_page'] ) {
-	    		$count = abs( intval( $baseArgs['items_per_page'] ) );
 	    		if( $baseArgs['paginate'] ) {
-	    			$query = $query->paginate($count);
+	    			// BUG - needed a hack, done below.
+	    			// using get() instead of paginate() because Cache CANNOT return LengthAwarePaginator object.
+	    			$query = $query->get();
 	    		} else {
+	    			$count = abs( intval( $baseArgs['items_per_page'] ) );
 		    		$query = $query->take($count)->get();
 	    		}
 	    	} else {
@@ -318,6 +322,52 @@ class NotificModel extends Model
 	    foreach( $values as $key => $value ) :
 			$values[$key]->meta = self::maybeUnserialize($value->meta);
 	    endforeach;
+
+	    /**
+	     * Fixed Bug: Pagination on Cached data.
+	     *
+	     * Laravel Cache::remember is always returning an 'array' of the data retrieved,
+	     * not the LengthAwarePaginator class object. Hence we need to prepare the
+	     * pagination on our own.
+	     *
+	     * With the hack we're using LengthAwarePaginator class to get current page number,
+	     * current path, then making the array into a Laravel collection, and slicing it
+	     * to let the result paginate each time.
+	     *
+	     * Finally using the LengthAwarePaginator class to build the paginated object for
+	     * us to let us use the $object->links() whenever necessary.
+	     *
+	     * @since   1.0.0 Introduced.
+	     *
+	     * @author  psampaz
+	     * @link    http://psampaz.github.io/custom-data-pagination-with-laravel-5/
+	     *
+	     * @author  Joey Hammett
+	     * @link    http://psampaz.github.io/custom-data-pagination-with-laravel-5/#comment-2787553172
+	     *
+	     * @author  Elvis Magagula
+	     * @link    http://psampaz.github.io/custom-data-pagination-with-laravel-5/#comment-2836459319
+	     * ...
+	     */
+	    if( $baseArgs['paginate'] ) {
+			// Get current page form url e.g. &page=6.
+			$currentPage = LengthAwarePaginator::resolveCurrentPage();
+
+			// Get current path.
+			$currentPath = LengthAwarePaginator::resolveCurrentPath();
+
+			// Create a new Laravel collection from the array data.
+			$collection  = new Collection($values);
+
+			// Define how many items we want to be visible in each page.
+			$perPage     = abs( intval( $baseArgs['items_per_page'] ) );
+
+			// Slice the collection to get the items to display in current page.
+			$results     = $collection->slice(($currentPage - 1) * $perPage, $perPage)->all();
+
+			// Create our paginator and pass it to the view.
+			$values      = new LengthAwarePaginator($results, count($collection), $perPage, $currentPage, ['path' => $currentPath]);
+	    }
 
 	    return $values;
 	}
