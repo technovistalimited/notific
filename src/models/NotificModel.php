@@ -150,6 +150,17 @@ class NotificModel extends Model
     	if(empty($userId)) return 'You must define a user ID';
 
     	/**
+    	 * Is cache enabled?
+    	 * Whether or not the caching is enabled.
+    	 * @var boolean.
+    	 * ...
+    	 */
+    	$isCache = (bool) config('notific.cache.is_cache');
+
+    	// Cache is disabled, no need to proceed.
+    	if( ! $isCache ) return;
+
+    	/**
     	 * Cache Key.
     	 * Manage the cache files with the key defined.
     	 * @var string.
@@ -204,10 +215,63 @@ class NotificModel extends Model
         }
     }
 
+
+    /**
+     * Query the Notifications.
+     *
+     * Made a separate method to reUse the code.
+     *
+     * @since  1.0.0 Introduced.
+     *
+     * @param  integer $userId  User ID.
+     * @param  array $baseArgs  Array of arguments.
+     * @param  boolean $isRead  isRead status.
+     * @param  boolean $isCache Whether cache is enabled or not.
+     * @return null|object      Object if result found, null otherwise.
+     * ---------------------------------------------------------------------
+     */
+	private static function _queryNotifications( $userId, $baseArgs, $isRead, $isCache ) {
+
+    	$query = DB::table( 'user_notifications' )
+                ->leftJoin( 'notifications', 'user_notifications.notification_id', '=', 'notifications.id' )
+                ->where( 'user_notifications.user_id', $userId )
+                ->select( 'notifications.*' );
+
+    	if( 'all' === $baseArgs['read_status'] ) {
+    		$query = $query;
+    	} else {
+    		$query = $query->where( 'user_notifications.is_read', $isRead );
+    	}
+
+    	$query = $query->orderBy($baseArgs['orderby'], $baseArgs['order']);
+
+    	if( -1 != $baseArgs['items_per_page'] ) {
+    		$count = abs( intval( $baseArgs['items_per_page'] ) );
+    		if( $baseArgs['paginate'] ) {
+    			// BUG - needed a hack, done below.
+    			// using get() instead of paginate() because Cache CANNOT return LengthAwarePaginator object.
+    			if( $isCache ) {
+    				$query = $query->get();
+    			} else {
+    				$query = $query->paginate($count);
+    			}
+    		} else {
+	    		$query = $query->take($count)->get();
+    		}
+    	} else {
+			$query = $query->get();
+    	}
+
+    	return $query;
+
+    }
+
 	/**
 	 * Retrieve Notifications.
 	 *
 	 * @since  1.0.0 Introduced.
+	 *
+	 * @see    self::_queryNotifications() Reusable query method.
 	 *
 	 * @param  integer $userId   Individual user ID.
 	 * @param  array   $arguments {
@@ -262,57 +326,44 @@ class NotificModel extends Model
 		}
 
 		/**
-		 * Cache Key.
-		 * Manage the cache files with the key defined.
-		 * @var string.
+		 * Is cache enabled?
+		 * Whether or not the caching is enabled.
+		 * @var boolean.
 		 * ...
 		 */
-		$cacheKey = "notific_$userId";
+		$isCache = (bool) config('notific.cache.is_cache');
 
-	    /**
-	     * Override the Cache Time, if you want.
-	     * Default: 10 minutes.
-	     * @var integer.
-	     * ...
-	     */
-	    $cacheTime = (int) config('notific.cache.cache_time');
+		if( $isCache ) {
 
-	    /**
-	     * Cache and return data.
-	     * @var null|object.
-	     * ...
-	     */
-	    $values = Cache::remember($cacheKey, $cacheTime, function() use( $userId, $baseArgs, $isRead ) {
+			/**
+			 * Cache Key.
+			 * Manage the cache files with the key defined.
+			 * @var string.
+			 * ...
+			 */
+			$cacheKey = "notific_$userId";
 
-	    	$query = DB::table( 'user_notifications' )
-	                ->leftJoin( 'notifications', 'user_notifications.notification_id', '=', 'notifications.id' )
-	                ->where( 'user_notifications.user_id', $userId )
-	                ->select( 'notifications.*' );
+		    /**
+		     * Override the Cache Time, if you want.
+		     * Default: 10 minutes.
+		     * @var integer.
+		     * ...
+		     */
+		    $cacheTime = (int) config('notific.cache.cache_time');
 
-	    	if( 'all' === $baseArgs['read_status'] ) {
-	    		$query = $query;
-	    	} else {
-	    		$query = $query->where( 'user_notifications.is_read', $isRead );
-	    	}
+		    /**
+		     * Cache and return data.
+		     * @see  self::_queryNotifications()
+		     * @var  null|object.
+		     * ...
+		     */
+		    $values = Cache::remember($cacheKey, $cacheTime, function() use( $userId, $baseArgs, $isRead ) {
+		    	return self::_queryNotifications( $userId, $baseArgs, $isRead, $isCache );
+		    });
 
-	    	$query = $query->orderBy($baseArgs['orderby'], $baseArgs['order']);
-
-	    	if( -1 != $baseArgs['items_per_page'] ) {
-	    		if( $baseArgs['paginate'] ) {
-	    			// BUG - needed a hack, done below.
-	    			// using get() instead of paginate() because Cache CANNOT return LengthAwarePaginator object.
-	    			$query = $query->get();
-	    		} else {
-	    			$count = abs( intval( $baseArgs['items_per_page'] ) );
-		    		$query = $query->take($count)->get();
-	    		}
-	    	} else {
-				$query = $query->get();
-	    	}
-
-	    	return $query;
-
-	    });
+		} else {
+			$values = self::_queryNotifications( $userId, $baseArgs, $isRead, $isCache );
+		}
 
 	    /**
 	     * MaybeUnserialize.
@@ -350,7 +401,7 @@ class NotificModel extends Model
 	     * @link    http://psampaz.github.io/custom-data-pagination-with-laravel-5/#comment-2836459319
 	     * ...
 	     */
-	    if( $baseArgs['paginate'] ) {
+	    if( $isCache && $baseArgs['paginate'] ) {
 			// Get current page form url e.g. &page=6.
 			$currentPage = LengthAwarePaginator::resolveCurrentPage();
 

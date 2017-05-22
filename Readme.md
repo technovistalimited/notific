@@ -25,7 +25,7 @@ We might not support the package full throttle. But bug reports are welcome.
 * Store notifications into database
 * Fetch notifications from database
 * Store and fetch any types of additional information for notification with meta data
-* Cache data to save some valuable resources
+* Cache data to save some valuable resources - configurable
 
 Features that are _not_ present:
 * Event listener and real time notification
@@ -33,7 +33,7 @@ Features that are _not_ present:
 ## Installation
 
 The package is **NOT AVAILABLE in Packagist**, hence you have to download it from this repository.<br>
-[<kbd>**DOWNLOAD v0.1.2**</kbd>](https://github.com/mayeenulislam/notific/releases/tag/v0.1.2)
+[<kbd>**DOWNLOAD v0.1.3**</kbd>](https://github.com/mayeenulislam/notific/releases/tag/v0.1.3)
 
 #### Step 1: Put the package in place
 * Create a directory in your app root with the name `packages`.
@@ -96,8 +96,12 @@ php artisan migrate
 ## Configuration
 Change configuration in `config/notific.php`.
 
+### Cache status:
+Set whether to use the cache or not, under `'cache' => ['is_cache']`. Accepted value: `true` (enabled), `false` (disabled)<br>
+_default: true_ - enabled
+
 ### Cache time:
-Change the time under `'cache' => ['cache_time']`.<br>
+Change the time under `'cache' => ['cache_time']`. Accepted value: any positive integer to denote minute.<br>
 _default: 10_ minutes
 
 ## API: How to use
