@@ -17,7 +17,7 @@ return [
 		 * Default: true - enabled.
 		 * ---------------------------------------------------------------------
 		 */
-		'is_cache' => false,
+		'is_cache' => true,
 
 		/**
 		 * Cache Time.
