@@ -33,7 +33,7 @@ Features that are _not_ present:
 ## Installation
 
 The package is **NOT AVAILABLE in Packagist**, hence you have to download it from this repository.<br>
-[<kbd>**DOWNLOAD v0.1.3**</kbd>](https://github.com/mayeenulislam/notific/releases/tag/v0.1.3)
+[<kbd>**DOWNLOAD v0.1.4**</kbd>](https://github.com/mayeenulislam/notific/releases/tag/v0.1.4)
 
 #### Step 1: Put the package in place
 * Create a directory in your app root with the name `packages`.
@@ -199,6 +199,9 @@ notify( 21, 'Your application is approved. Click to see it.', 'notification', ar
 
 // Notified with someone who (with ID 8) assigned the notification
 notify( 21, 'Your application submitted.', 'notification', '', 8 ) );
+
+// Notify multiple users (with ID 21, 4, and 5) at a time
+notify( [21, 4, 5], 'An application is submitted. Please check.' );
 ```
 
 ### 02. Get notifications
