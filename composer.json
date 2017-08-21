@@ -1,19 +1,19 @@
 {
-  "name"       : "mayeenulislam/notific",
+  "name"       : "technovistalimited/notific",
   "description": "Laravel simple, static and minimal notification system",
   "keywords"   : ["laravel", "notification"],
   "license"    : "GPL-2.0+",
   "authors"    : [
     {
-      "name"    : "Nazmul Hasan",
-      "email"   : "nazmul.sbpgc@gmail.com",
-      "homepage": "http://orocoder.com",
-      "role"    : "Developer"
-    },
-    {
       "name"    : "Mayeenul Islam",
       "email"   : "wz.islam@gmail.com",
       "homepage": "http://nanodesignsbd.com",
+      "role"    : "Developer"
+    },
+    {
+      "name"    : "Nazmul Hasan",
+      "email"   : "nazmul.sbpgc@gmail.com",
+      "homepage": "http://orocoder.com",
       "role"    : "Developer"
     }
   ],

@@ -2,12 +2,12 @@
 
 Notific is a simple, and minimal, static notification system for Laravel. It stores notification data based on user_id, and fetch notifications for the user_id. It's not _that_ feature rich.
 
-[![GitHub release](https://img.shields.io/github/release/mayeenulislam/notific.svg?style=flat-square)](https://github.com/mayeenulislam/notific/releases)
-[![GitHub license](https://img.shields.io/badge/license-GPL2.0+-blue.svg?style=flat-square)](https://raw.githubusercontent.com/mayeenulislam/notific/master/LICENSE.txt)
+[![GitHub release](https://img.shields.io/github/release/technovistalimited/notific.svg?style=flat-square)](https://github.com/technovistalimited/notific/releases)
+[![GitHub license](https://img.shields.io/badge/license-GPL2.0+-blue.svg?style=flat-square)](https://raw.githubusercontent.com/technovistalimited/notific/master/LICENSE.txt)
 [![Laravel package](https://img.shields.io/badge/laravel-yes-orange.svg?style=flat-square)](https://laravel.com/)
 
 **License:** GPL-2.0+<br>
-**Developers:** [Nazmul Hasan](https://github.com/nazmulcse), [Mayeenul Islam](https://github.com/mayeenulislam)
+**Developers:** [Mayeenul Islam](https://github.com/mayeenulislam), [Nazmul Hasan](https://github.com/nazmulcse)
 
 ---
 <div align="center">
@@ -33,35 +33,35 @@ Features that are _not_ present:
 ## Installation
 
 The package is **NOT AVAILABLE in Packagist**, hence you have to download it from this repository.<br>
-[<kbd>**DOWNLOAD v0.1.4**</kbd>](https://github.com/mayeenulislam/notific/releases/tag/v0.1.4)
+[<kbd>**DOWNLOAD v0.1.4**</kbd>](https://github.com/technovistalimited/notific/releases/tag/v0.1.4)
 
 #### Step 1: Put the package in place
 * Create a directory in your app root with the name `packages`.
-* Create another directory under `packages` named `mayeenulislam`. (vendor name)
-* Download the latest release, extract the archive and put it under the `packages\mayeenulislam` directory.
-* Your directory structure would be: `packages\mayeenulislam\notific\src\...`
+* Create another directory under `packages` named `technovistalimited`. (vendor name)
+* Download the latest release, extract the archive and put it under the `packages\technovistalimited` directory.
+* Your directory structure would be: `packages\technovistalimited\notific\src\...`
 
 #### Step 2: Add the repository to your app
 **composer.json**
 
 Open up the `composer.json` of your app root and add the following line under `psr-4` `autoload` array:
 ```
-"Mayeenulislam\\Notific\\": "packages/mayeenulislam/notific/src"
+"Technovistalimited\\Notific\\": "packages/technovistalimited/notific/src"
 ```
 
 And add the following line under `files` `autoload` array:
 ```
-"packages/mayeenulislam/notific/src/helpers/helpers.php"
+"packages/technovistalimited/notific/src/helpers/helpers.php"
 ```
 
 So that they would look similar to:
 ```
 "autoload": {
     "psr-4": {
-        "Mayeenulislam\\Notific\\": "packages/mayeenulislam/notific/src"
+        "Technovistalimited\\Notific\\": "packages/technovistalimited/notific/src"
     },
     "files": [
-        "packages/mayeenulislam/notific/src/helpers/helpers.php"
+        "packages/technovistalimited/notific/src/helpers/helpers.php"
     ]
 }
 ```
@@ -71,7 +71,7 @@ So that they would look similar to:
 Add the following string to `config/app.php` under `providers` array:
 
 ```php
-Mayeenulislam\Notific\NotificServiceProvider::class,
+Technovistalimited\Notific\NotificServiceProvider::class,
 ```
 
 #### Step 3: Let composer do the rest
@@ -85,7 +85,7 @@ composer dump-autoload
 #### Step 4: Configuration and migration
 Make configuration and migration file[s] ready first:
 ```
-php artisan vendor:publish --provider="Mayeenulislam\Notific\NotificServiceProvider"
+php artisan vendor:publish --provider="Technovistalimited\Notific\NotificServiceProvider"
 ```
 
 Run the migration
@@ -235,7 +235,7 @@ markNotificationRead( 21, 56 );
 ## Contributions
 Any bug report is welcome. We might not support the package as you might require. But we will definitely try to fix the bugs as long as they meet our leisure.
 
-If you want to contribute code, feel free to add [Pull Request](https://github.com/mayeenulislam/notific/pulls).
+If you want to contribute code, feel free to add [Pull Request](https://github.com/technovistalimited/notific/pulls).
 
 ## Credits
 All the credit goes to the almighty God first. Thanks to Mr. Amiya Kishore Saha who let both of us make our first Laravel package. Thanks to Mr. Kamrul Hasan for reviewing the progress and suggesting his ideas. And thanks to [TechnoVista Limited](http://technovista.com.bd/) for supporting the initiative. Thanks to [Notifynder](https://github.com/fenos/Notifynder) - a Laravel notification package available at Packagist from Fabrizio - we followed them to learn. Thanks to [WordPress](https://wordpress.org/) - a GPL licensed web framework - we took some of their code thankfully.

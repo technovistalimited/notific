@@ -1,6 +1,6 @@
 <?php
 
-namespace Mayeenulislam\Notific\Models;
+namespace Technovistalimited\Notific\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;

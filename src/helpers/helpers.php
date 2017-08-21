@@ -1,5 +1,5 @@
 <?php
-use Mayeenulislam\Notific\Models\NotificModel;
+use Technovistalimited\Notific\Models\NotificModel;
 
 /**
  * Helper: notify()
