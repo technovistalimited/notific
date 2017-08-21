@@ -33,7 +33,7 @@ Features that are _not_ present:
 ## Installation
 
 The package is **NOT AVAILABLE in Packagist**, hence you have to download it from this repository.<br>
-[<kbd>**DOWNLOAD v0.1.4**</kbd>](https://github.com/technovistalimited/notific/releases/tag/v0.1.4)
+[<kbd>**DOWNLOAD v0.2.0**</kbd>](https://github.com/technovistalimited/notific/releases/tag/v0.2.0)
 
 #### Step 1: Put the package in place
 * Create a directory in your app root with the name `packages`.
@@ -236,6 +236,32 @@ markNotificationRead( 21, 56 );
 Any bug report is welcome. We might not support the package as you might require. But we will definitely try to fix the bugs as long as they meet our leisure.
 
 If you want to contribute code, feel free to add [Pull Request](https://github.com/technovistalimited/notific/pulls).
+
+## Un-installation
+Before un-installing the package, search the whole project of any declaration of `notify(`, `getNotifications(`, and `markNotificationRead(`, and remove the functions from the source, or comment 'em out. Otherwise they will generate fatal error after the un-installation.
+
+Now, open command console, and type:
+```
+composer remove packages/technovistalimited/notific
+```
+When it's done, revert the installation process manually:
+
+1. Open `composer.json` file and remove the two declarations of 'notific' under `psr-4` and `files` under `autoload`.
+2. Open `config/app.php` and remove the line `...NotificServiceProvider::class` under `providers` array.
+3. Remove the configuration file `notific.php` in `config/notific.php`
+4. Delete the two database tables manually (as the package is not released): table:`notifications`, and table:`user_notifications`.
+
+When you are done, open console and run:
+```
+composer dump-autoload
+```
+and
+```
+php artisan clear-compiled
+```
+If the package directory is not removed automatically, please manually remove the directory `packages/technovistalimited`.
+
+You're done!
 
 ## Credits
 All the credit goes to the almighty God first. Thanks to Mr. Amiya Kishore Saha who let both of us make our first Laravel package. Thanks to Mr. Kamrul Hasan for reviewing the progress and suggesting his ideas. And thanks to [TechnoVista Limited](http://technovista.com.bd/) for supporting the initiative. Thanks to [Notifynder](https://github.com/fenos/Notifynder) - a Laravel notification package available at Packagist from Fabrizio - we followed them to learn. Thanks to [WordPress](https://wordpress.org/) - a GPL licensed web framework - we took some of their code thankfully.
