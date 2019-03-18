@@ -2,7 +2,7 @@
 
 Notific is a simple, and minimal, static notification system for Laravel. It stores notification data based on user_id, and fetch notifications for the user_id. It's not _that_ feature rich.
 
-[![GitHub release](https://img.shields.io/github/release/technovistalimited/notific.svg?style=flat-square)](https://github.com/technovistalimited/notific/releases)
+[![GitHub release](https://img.shields.io/github/release-pre/technovistalimited/notific.svg?style=flat-square)](https://github.com/technovistalimited/notific/releases)
 [![GitHub license](https://img.shields.io/badge/license-GPL2.0+-blue.svg?style=flat-square)](https://raw.githubusercontent.com/technovistalimited/notific/master/LICENSE.txt)
 [![Laravel package](https://img.shields.io/badge/laravel-yes-orange.svg?style=flat-square)](https://laravel.com/)
 
