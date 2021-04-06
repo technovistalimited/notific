@@ -1,8 +1,10 @@
 ## IDE/Editor
 .idea
+.vscode
 .idea/*
 *.sublime-project
 *.sublime-workspace
+*.code-workspace
 _ide_helper.php
 sublime-gulp.log
 
