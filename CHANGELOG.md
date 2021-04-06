@@ -24,6 +24,7 @@
   * Prefix all the Notific functions with `Notific::`, eg. `getNotifications()` will be `Notific::getNotifications()`
   * Modify the `composer.json` and **remove** this line from `files` array: `"packages/technovistalimited/notific/src/helpers/helpers.php"`
   * Run `composer dump-autoload` again
+  * In database, the `notifications.id` and `user_notifications.id` are now `bigInteger`
 * Removed helper function
 * Fixes in Cache time (since Laravel 5.8 cache time is in seconds)
 * Reorganized model code into their own models
