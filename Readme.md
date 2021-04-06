@@ -14,11 +14,11 @@ The package **has no UI**, it just a database based cached data-driven mechanism
 **Developers:** [Mayeenul Islam](https://github.com/mayeenulislam), [Nazmul Hasan](https://github.com/nazmulcse)
 
 ---
-<center>
+<div align="center">
 _________NOTICE_________<br>
 The package is developed only for a sole project. If it helps you, that's why it's here.<br>
 We might not support the package full throttle. But bug reports are welcome.
-</center>
+</div>
 
 
 ---
@@ -43,6 +43,12 @@ Open up the command console on the root of your app and run:
 
 ```bash
 git clone git@github.com:technovistalimited/notific.git packages/technovistalimited/notific/
+```
+
+If you want to use the package for production, run the following command:`
+
+```bash
+cd packages/technovistalimited/notific/ && rm -rf .git .distignore .gitignore .editorconfig changelog.md phpcs.xml
 ```
 
 ### Step 2: Add the repository to your app
