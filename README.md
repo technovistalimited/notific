@@ -16,12 +16,41 @@ The package **has no UI**, it just a database based cached data-driven mechanism
 ---
 <div align="center">
 _________NOTICE_________<br>
-The package is developed only for a sole project. If it helps you, that's why it's here.<br>
-We might not support the package full throttle. But bug reports are welcome.
+The package is developed for the organization's internal use only. If it helps you, that's why it's here. We might not support the package full throttle. But bug reports are welcome.
 </div>
 
 
 ---
+
+## Table of Contents
+<!-- MarkdownTOC -->
+
+- [Features](#features)
+- [Installation](#installation)
+	- [Step 1: Download & Setup](#step-1-download--setup)
+		- [Providers array](#providers-array)
+		- [Aliases array](#aliases-array)
+	- [Step 2: Publish the Necessary files](#step-2-publish-the-necessary-files)
+	- [Step 3: Make tables ready](#step-3-make-tables-ready)
+- [Configuration](#configuration)
+	- [Cache status](#cache-status)
+	- [Cache time](#cache-time)
+- [API: How to use](#api-how-to-use)
+	- [Store notification](#store-notification)
+	- [Get notifications](#get-notifications)
+	- [Get notification count](#get-notification-count)
+	- [Mark notification as _read_](#mark-notification-as-read)
+- [Examples](#examples)
+	- [01. Create a notification](#01-create-a-notification)
+	- [02. Get notifications](#02-get-notifications)
+	- [03. Get notification count](#03-get-notification-count)
+	- [04. Mark notification as _read_](#04-mark-notification-as-read)
+	- [05. Maybe Unserialize](#05-maybe-unserialize)
+- [Contributions](#contributions)
+- [Uninstallation](#uninstallation)
+- [Credits](#credits)
+
+<!-- /MarkdownTOC -->
 
 ## Features
 
@@ -33,77 +62,45 @@ We might not support the package full throttle. But bug reports are welcome.
 
 Features that are _not_ present:
 
-* Event listener and real-time notification
+* Event listener and real-time notification (but you can easily extend into those)
 
 ## Installation
 
-### Step 1: Put the package in place
+### Step 1: Download & Setup
 
 Open up the command console on the root of your app and run:
 
 ```bash
-git clone git@github.com:technovistalimited/notific.git packages/technovistalimited/notific/
+composer require technovistalimited/notific
 ```
 
-If you want to use the package for production, run the following command:`
+#### Providers array
 
-```bash
-cd packages/technovistalimited/notific/ && rm -rf .git .distignore .gitignore .editorconfig changelog.md phpcs.xml
-```
-
-### Step 2: Add the repository to your app
-
-#### **composer.json**
-
-Open up the `composer.json` of your app root and add the following line under `psr-4` `autoload` array:
-
-```json
-"Technovistalimited\\Notific\\": "packages/technovistalimited/notific/src"
-```
-
-So that they would look similar to:
-
-```
-"autoload": {
-    "psr-4": {
-        "Technovistalimited\\Notific\\": "packages/technovistalimited/notific/src"
-    },
-}
-```
-
-#### **Providers array**
-
-Add the following string to `config/app.php` under `providers` array:
+Add the following string to the `config/app.php` under `providers` array:
 
 ```php
 Technovistalimited\Notific\NotificServiceProvider::class,
 ```
 
-#### **Aliases array**
+#### Aliases array
 
-Add the following line to the `config/app.php` under aliases array:
+Add the following line to the `config/app.php` under `aliases` array:
 
 ```php
 'Notific' => Technovistalimited\Notific\Facades\Notific::class,
 ```
 
-### Step 3: Let the composer do the rest
+### Step 2: Publish the Necessary files
 
-Open up the command console on the root of your app and run:
-
-```bash
-composer dump-autoload
-```
-
-### Step 4: Configuration and migration
-
-Make configuration and migration files ready first:
+Make the configuration and migration files ready first; in the command console, type and hit enter:
 
 ```bash
 php artisan vendor:publish --tag=notific
 ```
 
-Run the migration
+### Step 3: Make tables ready
+
+Open up the command console on the root of your app and run the migrations:
 
 ```bash
 php artisan migrate
@@ -318,34 +315,18 @@ Before uninstalling the package, search the whole project of any declaration of:
 
 and remove the functions from the source, or comment them out. Otherwise, they will generate a fatal error after uninstallation.
 
+* Open `config/app.php` and remove the line `...NotificServiceProvider::class` under `providers` and `aliases` array.
+* Remove the configuration file `notific.php` in `config/notific.php`
+* Remove the notific migration files from `database/migrations/`
+* Delete the two database tables manually (as the package is not released): table:`notifications`, and table:`user_notifications`
+
 Now, open up the command console, and type:
 
 ```bash
-composer remove packages/technovistalimited/notific
+composer remove technovistalimited/notific
 ```
 
-When it is done, revert the installation process manually:
-
-1. Open `composer.json` file and remove the two declarations of 'notific' under `psr-4` under `autoload`.
-2. Open `config/app.php` and remove the line `...NotificServiceProvider::class` under `providers` and `aliases` array.
-3. Remove the configuration file `notific.php` in `config/notific.php`
-4. Delete the two database tables manually (as the package is not released): table:`notifications`, and table:`user_notifications`.
-
-When you are done, open console and run:
-
-```bash
-composer dump-autoload
-```
-
-and
-
-```
-php artisan clear-compiled
-```
-
-If the package directory is not removed automatically, please manually remove the directory `packages/technovistalimited`.
-
-You're done!
+You are done!
 
 ## Credits
 
