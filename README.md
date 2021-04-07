@@ -54,15 +54,15 @@ The package is developed for the organization's internal use only. If it helps y
 
 ## Features
 
-* Database table creation using migration
-* Store notifications into the database
-* Fetch notifications from the database
-* Store and fetch any types of additional information for notification with metadata
-* Cache data to save some valuable resources - configurable
+- Database table creation using migration
+- Store notifications into the database
+- Fetch notifications from the database
+- Store and fetch any types of additional information for notification with metadata
+- Cached data to save some valuable resources - configurable
 
 Features that are _not_ present:
 
-* Event listener and real-time notification (but you can easily extend into those)
+- Event listener and real-time notification (but you can easily extend into those)
 
 ## Installation
 
@@ -307,18 +307,11 @@ If you want to contribute code, feel free to add [Pull Request](https://github.c
 
 ## Uninstallation
 
-Before uninstalling the package, search the whole project of any declaration of:
-
-* `Notific::notify(`,
-* `Notific::getNotifications(`, and
-* `Notific::markNotificationRead(`,
-
-and remove the functions from the source, or comment them out. Otherwise, they will generate a fatal error after uninstallation.
-
-* Open `config/app.php` and remove the line `...NotificServiceProvider::class` under `providers` and `aliases` array.
-* Remove the configuration file `notific.php` in `config/notific.php`
-* Remove the notific migration files from `database/migrations/`
-* Delete the two database tables manually (as the package is not released): table:`notifications`, and table:`user_notifications`
+- Search the whole project of any declaration of `Notific::`, and remove the functions from the source, or comment them out. Otherwise, they will generate a fatal error after uninstallation.
+- Open `config/app.php` and remove the line `...NotificServiceProvider::class` under `providers` and `aliases` array.
+- Remove the configuration file `notific.php` in `config/notific.php`
+- Remove the notific migration files from `database/migrations/`
+- Delete the two database tables manually (as the package is not released): table:`notifications`, and table:`user_notifications`
 
 Now, open up the command console, and type:
 
