@@ -17,7 +17,7 @@
 
 </details>
 
-## `v1.0.0` - 2021-04-06 - First Public Release
+## `v1.0.0` - 2021-04-07 - First Public Release
 
 * Reorganized the structure of the package to match with the new Laravel package architecture
 * New API based on Facades (Has breaking changes)
@@ -31,6 +31,7 @@
 * Reorganized migrations into separate files
 * PSR-2 compatible code
 * Minimum Laravel version bumped to v5.8
+* Released on Packagist.org
 
 ## `v0.2.0` - 2017-08-21 - Transferred Ownership
 
