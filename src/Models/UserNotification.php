@@ -68,7 +68,7 @@ class UserNotification extends Model
 
         $result = $result->update([
             'is_read'    => 1,
-            'updated_at' => date('Y-m-d H:m:s')
+            'updated_at' => date('Y-m-d H:i:s')
         ]);
 
         if (empty($result)) {

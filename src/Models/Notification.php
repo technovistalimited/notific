@@ -107,7 +107,7 @@ class Notification extends Model
                 'notification_type' => trim($notificationType),
                 'meta'              => $metaData,
                 'created_by'        => $createdBy,
-                'created_at'        => date('Y-m-d H:m:s'),
+                'created_at'        => date('Y-m-d H:i:s'),
             ]);
     }
 
