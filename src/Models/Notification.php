@@ -116,8 +116,9 @@ class Notification extends Model
      *
      * @since 0.2.0 Introduced.
      * @since 1.0.0 Modified to be non-static.
+     * @since 1.0.2 Fixed for array of User IDs.
      *
-     * @param integer $userId User ID to clear cache for.
+     * @param integer|array $userId User ID/IDs to clear cache for.
      */
     public function clearCache($userId)
     {
@@ -134,16 +135,33 @@ class Notification extends Model
             return;
         }
 
-        /**
-         * Cache Key.
-         * Manage the cache files with the key defined.
-         * @var string.
-         * ...
-         */
-        $cacheKey = "notific_$userId";
 
-        if (Cache::has($cacheKey)) {
-            Cache::forget($cacheKey);
+        if (is_array($userId)) {
+	        foreach ($userId as $uId) {
+	        	/**
+		         * Cache Key.
+		         * Manage the cache files with the key defined.
+		         * @var string.
+		         * ...
+		         */
+		        $cacheKey = "notific_$uId";
+
+		        if (Cache::has($cacheKey)) {
+		            Cache::forget($cacheKey);
+		        }
+	        }
+        } else {
+        	/**
+	         * Cache Key.
+	         * Manage the cache files with the key defined.
+	         * @var string.
+	         * ...
+	         */
+	        $cacheKey = "notific_$userId";
+
+	        if (Cache::has($cacheKey)) {
+	            Cache::forget($cacheKey);
+	        }
         }
     }
 
