@@ -11,34 +11,68 @@ use Technovistalimited\Notific\Models\Notification;
 
 class UserNotification extends Model
 {
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
     protected $table = 'user_notifications';
 
+    /**
+     * The database connection that the model should use.
+     * Resolved dynamically from config at runtime.
+     *
+     * @var string|null
+     */
+    protected $connection = null;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
         'user_id',
         'notification_id',
         'is_read',
-
         'created_by',
         'created_at',
         'updated_by',
         'updated_at',
     ];
 
+    /**
+     * Get the database connection name for the model.
+     *
+     * Reads from config('notific.connection'). If null or empty,
+     * falls back to the default connection (null = default).
+     *
+     * This method is called by Eloquent internally to determine
+     * which connection to use for all model queries.
+     *
+     * @return string|null
+     */
+    public function getConnectionName()
+    {
+        $configConnection = config('notific.connection');
+        return !empty($configConnection) ? $configConnection : $this->connection;
+    }
 
     /**
      * Store User Notification.
      *
-     * @since 0.2.0 Introduced.
-     * @since 1.0.0 Modified to be non-static with PSR-2 fixes and relocated in own model.
+     * Uses the configured database connection from config('notific.connection').
+     * If no custom connection is configured, uses the default connection.
      *
-     * @param  integer|array $userId         User ID or Array of user IDs.
-     * @param  integer       $notificationId Notification ID.
+     * @param integer|array $userId         User ID or Array of user IDs.
+     * @param integer       $notificationId Notification ID.
      *
      * @return integer User Notification ID, otherwise null.
      */
     public function store($userId, $notificationId)
     {
-        return DB::table('user_notifications')
+        return DB::connection($this->getConnectionName())
+            ->table('user_notifications')
             ->insertGetId([
                 'user_id'         => intval($userId),
                 'notification_id' => intval($notificationId),
@@ -49,8 +83,8 @@ class UserNotification extends Model
     /**
      * Mark Notification as read.
      *
-     * @since 0.2.0 Introduced.
-     * @since 1.0.0 Modified to be non-static with PSR-2 fixes and relocated in own model.
+     * Uses the configured database connection from config('notific.connection').
+     * If no custom connection is configured, uses the default connection.
      *
      * @param integer $userId         User ID.
      * @param integer $notificationId Notification ID. Default: null.
@@ -59,7 +93,8 @@ class UserNotification extends Model
      */
     public function markAsRead($userId, $notificationId = null)
     {
-        $result = DB::table('user_notifications')
+        $result = DB::connection($this->getConnectionName())
+            ->table('user_notifications')
             ->where('user_id', $userId);
 
         if (!empty($notificationId)) {
@@ -85,23 +120,20 @@ class UserNotification extends Model
     /**
      * Query the Notifications.
      *
-     * Made a separate method to reUse the code.
+     * Uses the configured database connection from config('notific.connection').
+     * If no custom connection is configured, uses the default connection.
      *
      * @param integer $userId   User ID.
      * @param array   $baseArgs Array of arguments.
      * @param boolean $isRead   isRead status.
      * @param boolean $isCache  Whether cache is enabled or not.
      *
-     * @access private
-     *
-     * @since 0.2.0 Introduced.
-     * @since 1.0.0 Modified to be non-static with PSR-2 fixes and relocated in own model.
-     *
      * @return null|object Object if result found, null otherwise.
      */
     private function queryNotifications($userId, $baseArgs, $isRead, $isCache)
     {
-        $query = DB::table('user_notifications')
+        $query = DB::connection($this->getConnectionName())
+            ->table('user_notifications')
             ->leftJoin('notifications', 'user_notifications.notification_id', '=', 'notifications.id')
             ->where('user_notifications.user_id', $userId)
             ->select(
@@ -140,11 +172,6 @@ class UserNotification extends Model
     /**
      * Retrieve Notifications.
      *
-     * @since 0.2.0 Introduced.
-     * @since 1.0.0 Modified to be non-static with PSR-2 fixes and relocated in own model.
-     *
-     * @see $this->queryNotifications() Reusable query method.
-     *
      * @param integer $userId   Individual user ID.
      * @param array   $arguments {
      *  Optional. Array of Query parameters.
@@ -174,7 +201,7 @@ class UserNotification extends Model
      *   Default -1 - fetch everything.
      * }
      *
-     * @return array  Notifications object.
+     * @return array Notifications object.
      */
     public function getNotifications($userId, $arguments = array())
     {
@@ -205,35 +232,23 @@ class UserNotification extends Model
 
         /**
          * Is cache enabled?
-         * Whether or not the caching is enabled.
          * @var boolean.
-         * ...
          */
         $isCache = (bool) config('notific.cache.is_cache');
 
         if ($isCache) {
             /**
              * Cache Key.
-             * Manage the cache files with the key defined.
              * @var string.
-             * ...
              */
             $cacheKey = "notific_$userId";
 
             /**
-             * Override the Cache Time, if you want.
-             * Default: 10 minutes.
+             * Cache Time.
              * @var integer.
-             * ...
              */
             $cacheTime = (int) config('notific.cache.cache_time');
 
-            /**
-             * Cache and return data.
-             * @see  $this->queryNotifications()
-             * @var  null|object.
-             * ...
-             */
             $values = Cache::remember($cacheKey, $cacheTime, function () use ($userId, $baseArgs, $isRead, $isCache) {
                 return $this->queryNotifications($userId, $baseArgs, $isRead, $isCache);
             });
@@ -244,12 +259,10 @@ class UserNotification extends Model
         /**
          * MaybeUnserialize.
          * Unserialize the meta value if necessary.
-         * @var array.
-         * ...
          */
-        foreach ($values as $key => $value) :
+        foreach ($values as $key => $value) {
             $values[$key]->meta = $notification->maybeUnserialize($value->meta);
-        endforeach;
+        }
 
         /**
          * Fixed Bug: Pagination on Cached data.
@@ -257,25 +270,6 @@ class UserNotification extends Model
          * Laravel Cache::remember is always returning an 'array' of the data retrieved,
          * not the LengthAwarePaginator class object. Hence we need to prepare the
          * pagination on our own.
-         *
-         * With the hack we're using LengthAwarePaginator class to get current page number,
-         * current path, then making the array into a Laravel collection, and slicing it
-         * to let the result paginate each time.
-         *
-         * Finally using the LengthAwarePaginator class to build the paginated object for
-         * us to let us use the $object->links() whenever necessary.
-         *
-         * @since 0.2.0 Introduced.
-         *
-         * @author  psampaz
-         * @link    http://psampaz.github.io/custom-data-pagination-with-laravel-5/
-         *
-         * @author  Joey Hammett
-         * @link    http://psampaz.github.io/custom-data-pagination-with-laravel-5/#comment-2787553172
-         *
-         * @author  Elvis Magagula
-         * @link    http://psampaz.github.io/custom-data-pagination-with-laravel-5/#comment-2836459319
-         * ...
          */
         if ($isCache && $baseArgs['paginate']) {
             // Get current page form url e.g. &page=6.
@@ -306,11 +300,10 @@ class UserNotification extends Model
      * @param integer $userId User ID.
      * @param string  $status Status.
      *
-     * @since 1.0.0 Introduced.
-     *
      * @return integer Count in number.
      */
-    public function getNotificationCount($userId, $status = 'all') {
+    public function getNotificationCount($userId, $status = 'all')
+    {
         $_status = array();
 
         switch ($status) {

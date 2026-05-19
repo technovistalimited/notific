@@ -1,44 +1,44 @@
 {
-  "name"       : "technovistalimited/notific",
-  "description": "Laravel simple, static and minimal notification system",
-  "keywords"   : ["laravel", "notification"],
-  "license"    : "GPL-2.0+",
-  "version"    : "1.0.2",
-  "authors"    : [
-    {
-      "name"    : "Mayeenul Islam",
-      "email"   : "wz.islam@gmail.com",
-      "homepage": "https://nanodesignsbd.com",
-      "role"    : "Developer"
+    "name": "technovistalimited/notific",
+    "description": "Laravel simple, static and minimal notification system",
+    "keywords": ["laravel", "notification"],
+    "license": "GPL-2.0+",
+    "version": "2.0.0",
+    "authors": [
+        {
+            "name": "Mayeenul Islam",
+            "email": "wz.islam@gmail.com",
+            "homepage": "https://nanodesignsbd.com",
+            "role": "Developer"
+        },
+        {
+            "name": "Nazmul Hasan",
+            "email": "nazmul.sbpgc@gmail.com",
+            "homepage": "https://orocoder.com",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/technovistalimited/notific/issues"
     },
-    {
-      "name"    : "Nazmul Hasan",
-      "email"   : "nazmul.sbpgc@gmail.com",
-      "homepage": "https://orocoder.com",
-      "role"    : "Developer"
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^11.0 || ^12.0 || ^13.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Technovistalimited\\Notific\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Technovistalimited\\Notific\\NotificServiceProvider"
+            ],
+            "aliases": {
+                "Notific": "Technovistalimited\\Notific\\Facades\\Notific"
+            }
+        }
     }
-  ],
-  "support": {
-    "issues": "https://github.com/technovistalimited/notific/issues"
-  },
-  "minimum-stability": "dev",
-  "require-dev": {
-    "laravel/framework": ">=5.8"
-  },
-  "autoload": {
-    "psr-4": {
-      "Technovistalimited\\Notific\\": "src/"
-    }
-  },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "Technovistalimited\\Notific\\NotificServiceProvider"
-      ],
-      "aliases": {
-        "Notific": "Technovistalimited\\Notific\\Facades\\Notific"
-      }
-    }
-  }
-
 }

@@ -9,33 +9,61 @@ use Technovistalimited\Notific\Models\UserNotification;
 
 class Notification extends Model
 {
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
     protected $table = 'notifications';
 
+    /**
+     * The database connection that the model should use.
+     * Resolved dynamically from config at runtime.
+     *
+     * @var string|null
+     */
+    protected $connection = null;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
         'message',
         'notification_type',
         'meta',
-
         'created_by',
         'created_at',
     ];
+
+    /**
+     * Get the database connection name for the model.
+     *
+     * Reads from config('notific.connection'). If null or empty,
+     * falls back to the default connection (null = default).
+     *
+     * This method is called by Eloquent internally to determine
+     * which connection to use for all model queries.
+     *
+     * @return string|null
+     */
+    public function getConnectionName()
+    {
+        $configConnection = config('notific.connection');
+        return !empty($configConnection) ? $configConnection : $this->connection;
+    }
 
     /**
      * API: Notify.
      *
      * The method will store the notification into the respective tables.
      *
-     * @param  integer|array        $userId           User ID or Array of user IDs.
-     * @param  string               $message          Notification message.
-     * @param  string               $notificationType Type of the notification.
-     * @param  string|integer|array $metaData         Any meta information.
-     * @param  null|integer         $createdBy        Created by user ID.
-     *
-     * @since 0.2.0 Introduced.
-     * @since 1.0.0 Modified to be non-static. PSR-2 fixes.
-     *
-     * @see $this->storeNotification() Storing notification.
-     * @see UserNotification::store()  Assigning notification to user[s].
+     * @param integer|array        $userId           User ID or Array of user IDs.
+     * @param string               $message          Notification message.
+     * @param string               $notificationType Type of the notification.
+     * @param string|integer|array $metaData         Any meta information.
+     * @param null|integer         $createdBy        Created by user ID.
      *
      * @return boolean True if done, false otherwise.
      */
@@ -68,13 +96,13 @@ class Notification extends Model
     /**
      * Store Notification.
      *
-     * @param  string               $message          Notification message.
-     * @param  string               $notificationType Type of the notification.
-     * @param  string|integer|array $metaData         Any meta information.
-     * @param  null|integer         $createdBy        Created by user ID.
+     * Uses the configured database connection from config('notific.connection').
+     * If no custom connection is configured, uses the default connection.
      *
-     * @since 0.2.0 Introduced.
-     * @since 1.0.0 Modified to be non-static. PSR-2 fixes.
+     * @param string               $message          Notification message.
+     * @param string               $notificationType Type of the notification.
+     * @param string|integer|array $metaData         Any meta information.
+     * @param null|integer         $createdBy        Created by user ID.
      *
      * @return integer Notification ID, otherwise null.
      */
@@ -90,18 +118,17 @@ class Notification extends Model
          * MaybeSerialize Meta data.
          * Serialize meta data if necessary.
          * @var integer|string|array.
-         * ...
          */
         $metaData = $this->maybeSerialize($metaData);
 
         /**
          * Typecast the author info.
          * @var null|integer.
-         * ...
          */
         $createdBy = !empty($createdBy) ? intval($createdBy) : null;
 
-        return DB::table('notifications')
+        return DB::connection($this->getConnectionName())
+            ->table('notifications')
             ->insertGetId([
                 'message'           => trim($message),
                 'notification_type' => trim($notificationType),
@@ -114,19 +141,15 @@ class Notification extends Model
     /**
      * Clear specific cache.
      *
-     * @since 0.2.0 Introduced.
-     * @since 1.0.0 Modified to be non-static.
-     * @since 1.0.2 Fixed for array of User IDs.
-     *
      * @param integer|array $userId User ID/IDs to clear cache for.
+     *
+     * @return void
      */
     public function clearCache($userId)
     {
         /**
          * Is cache enabled?
-         * Whether or not the caching is enabled.
          * @var boolean.
-         * ...
          */
         $isCache = (bool) config('notific.cache.is_cache');
 
@@ -135,33 +158,28 @@ class Notification extends Model
             return;
         }
 
-
         if (is_array($userId)) {
-	        foreach ($userId as $uId) {
-	        	/**
-		         * Cache Key.
-		         * Manage the cache files with the key defined.
-		         * @var string.
-		         * ...
-		         */
-		        $cacheKey = "notific_$uId";
+            foreach ($userId as $uId) {
+                /**
+                 * Cache Key.
+                 * @var string.
+                 */
+                $cacheKey = "notific_$uId";
 
-		        if (Cache::has($cacheKey)) {
-		            Cache::forget($cacheKey);
-		        }
-	        }
+                if (Cache::has($cacheKey)) {
+                    Cache::forget($cacheKey);
+                }
+            }
         } else {
-        	/**
-	         * Cache Key.
-	         * Manage the cache files with the key defined.
-	         * @var string.
-	         * ...
-	         */
-	        $cacheKey = "notific_$userId";
+            /**
+             * Cache Key.
+             * @var string.
+             */
+            $cacheKey = "notific_$userId";
 
-	        if (Cache::has($cacheKey)) {
-	            Cache::forget($cacheKey);
-	        }
+            if (Cache::has($cacheKey)) {
+                Cache::forget($cacheKey);
+            }
         }
     }
 
@@ -173,12 +191,10 @@ class Notification extends Model
      *
      * Adopted from WordPress Core, then modified.
      *
-     * @since 0.2.0 Introduced.
-     * @since 1.0.0 Modified to be non-static.
+     * @param array $args     User defined arguments.
+     * @param array $defaults Default arguments.
      *
-     * @param  array $args     User defined arguments.
-     * @param  array $defaults Default arguments.
-     * @return array           Merged version of arguments.
+     * @return array Merged version of arguments.
      */
     public function parseArguments($args, $defaults)
     {
@@ -197,9 +213,6 @@ class Notification extends Model
      * Adopted from WordPress Core.
      *
      * @param array|string $original Data want to unserialize.
-     *
-     * @since 0.2.0 Introduced.
-     * @since 1.0.0 Modified to be non-static.
      *
      * @return array|string Data | Unserialized data.
      */
@@ -220,8 +233,6 @@ class Notification extends Model
      *
      * @param string|array $data Data to be serialized.
      *
-     * @since 0.2.0 Introduced.
-     *
      * @return string Serialized data | String.
      */
     public function maybeSerialize($data)
@@ -237,7 +248,6 @@ class Notification extends Model
         return $data;
     }
 
-
     /**
      * Check whether is serialized?
      *
@@ -245,8 +255,6 @@ class Notification extends Model
      *
      * @param string|array $data   Data to check serialization.
      * @param boolean      $strict Strict or not.
-     *
-     * @since 0.2.0 Introduced.
      *
      * @return boolean True | False.
      */
@@ -296,7 +304,7 @@ class Notification extends Model
                 } elseif (false === strpos($data, '"')) {
                     return false;
                 }
-                // Or, else fall through.
+                // no break - fall through
             case 'a':
             case 'O':
                 return (bool) preg_match("/^{$token}:[0-9]+:/s", $data);
